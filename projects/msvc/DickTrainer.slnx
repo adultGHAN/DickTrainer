@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="DickTrainer.vcxproj" Id="16c203b7-4ca4-4077-92bc-a112bd9b1da8" />
+</Solution>

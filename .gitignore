@@ -1,0 +1,22 @@
+# Build output
+build/
+
+# Visual Studio intermediate files
+.vs/
+*.user
+*.suo
+*.aps
+*.ncb
+*.sdf
+*.opensdf
+ipch/
+projects/msvc/DickTrainer/
+
+# Binaries
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.obj
+*.idb
