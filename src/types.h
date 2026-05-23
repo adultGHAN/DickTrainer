@@ -132,7 +132,7 @@ extern int g_bCompleted;
 extern int g_nTransparency;
 
 /* Dick position */
-extern TCHAR g_szDickPos[ 20 ];
+extern TCHAR g_szHorizontal[ 20 ];
 extern TCHAR g_szVertical[ 20 ];
 
 /* Performance timing */

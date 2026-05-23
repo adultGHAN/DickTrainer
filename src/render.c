@@ -232,11 +232,11 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     nBottomY = nHeight - nBottomMargin;
 
     /* Set dick position based on dick_pos */
-    if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
+    if( _tcscmp( g_szHorizontal, TEXT( "left" ) ) == 0 )
     {
         nPillarX = nWidth / 6;
     }
-    else if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
+    else if( _tcscmp( g_szHorizontal, TEXT( "right" ) ) == 0 )
     {
         nPillarX = nWidth * 5 / 6;
     }
@@ -345,7 +345,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
 
     dNextSecond = ceil( dAbsoluteTime );
 
-    if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
+    if( _tcscmp( g_szHorizontal, TEXT( "left" ) ) == 0 )
     {
         for( dTimeStep = dNextSecond; dTimeStep <= dAbsoluteTime + nWidth / dPixelsPerSecond; dTimeStep += 1.0 )
         {
@@ -358,7 +358,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
             LineTo( hdcMemory, nVerticalX, nBottomY );
         }
     }
-    else if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
+    else if( _tcscmp( g_szHorizontal, TEXT( "right" ) ) == 0 )
     {
         for( dTimeStep = dNextSecond; dTimeStep <= dAbsoluteTime + nWidth / dPixelsPerSecond; dTimeStep += 1.0 )
         {
@@ -467,7 +467,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     }
 
     /* Draw graph path over time */
-    if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
+    if( _tcscmp( g_szHorizontal, TEXT( "left" ) ) == 0 )
     {
         for( nPixelX = 0; nPixelX < nWidth; nPixelX++ )
         {
@@ -513,7 +513,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
             }
         }
     }
-    else if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
+    else if( _tcscmp( g_szHorizontal, TEXT( "right" ) ) == 0 )
     {
         for( nPixelX = nWidth - 1; nPixelX >= 0; nPixelX-- )
         {
@@ -643,7 +643,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     SelectObject( hdcMemory, hMarkerPen );
     SelectObject( hdcMemory, GetStockObject( NULL_BRUSH ) );
 
-    if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
+    if( _tcscmp( g_szHorizontal, TEXT( "left" ) ) == 0 )
     {
         for( nGridIndex = g_nCurrentCustomerStartAct; nGridIndex < g_nCurrentCustomerEndAct; nGridIndex++ )
         {
@@ -661,7 +661,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
             }
         }
     }
-    else if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
+    else if( _tcscmp( g_szHorizontal, TEXT( "right" ) ) == 0 )
     {
         for( nGridIndex = g_nCurrentCustomerStartAct; nGridIndex < g_nCurrentCustomerEndAct; nGridIndex++ )
         {

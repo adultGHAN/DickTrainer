@@ -194,10 +194,11 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
     cJSON *pSStd = NULL;            /* size distribution std */
     cJSON *pShape = NULL;           /* shape JSON object */
 
-    /* volume, transparency and dick position */
+    /* volume, transparency, horizontal and vertical position */
     cJSON *pVolumeObj = NULL;       /* volume JSON object */
     cJSON *pTransObj = NULL;        /* transparency JSON object */
-    cJSON *pDickposObj = NULL;      /* dick position JSON object */
+    cJSON *pDickposObj = NULL;      /* horizontal position JSON object */
+    cJSON *pVerticalObj = NULL;     /* vertical position JSON object */
     int nVolumeVal = 0;             /* volume value (0-100) */
     int nTransVal = 0;              /* transparency value (0-100) */
 
@@ -300,21 +301,34 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
         }
     }
 
-    /* ===== Load dick position setting ===== */
+    /* ===== Load horizontal position setting ===== */
     {
-        pDickposObj = cJSON_GetObjectItem( pJson, "dick_pos" );
+        pDickposObj = cJSON_GetObjectItem( pJson, "horizontal" );
         if( pDickposObj && pDickposObj->valuestring )
         {
             TCHAR *pszTmp = AllocTCHARFromUTF8( pDickposObj->valuestring );
             if( pszTmp )
             {
-                _tcsncpy( g_szDickPos, pszTmp, 19 );
-                g_szDickPos[ 19 ] = TEXT( '\0' );
+                _tcsncpy( g_szHorizontal, pszTmp, 19 );
+                g_szHorizontal[ 19 ] = TEXT( '\0' );
                 free( pszTmp );
             }
         }
     }
-
+    /* ===== Load vertical position setting ===== */
+    {
+        pVerticalObj = cJSON_GetObjectItem( pJson, "vertical" );
+        if( pVerticalObj && pVerticalObj->valuestring )
+        {
+            TCHAR *pszTmp = AllocTCHARFromUTF8( pVerticalObj->valuestring );
+            if( pszTmp )
+            {
+                _tcsncpy( g_szVertical, pszTmp, 19 );
+                g_szVertical[ 19 ] = TEXT( '\0' );
+                free( pszTmp );
+            }
+        }
+    }
 
     /* ===== Load customer data ===== */
     pCustomerObj = cJSON_GetObjectItem( pJson, "customer" );

@@ -70,7 +70,7 @@ int g_nTransparencyPct = 0;
 LARGE_INTEGER g_liLastInputTime = { 0 };
 
 /* Dick position */
-TCHAR g_szDickPos[ 20 ] = TEXT( "" );
+TCHAR g_szHorizontal[ 20 ] = TEXT( "" );
 
 /* JSON file path */
 TCHAR g_szJsonFilePath[ MAX_PATH ] = TEXT( "" );
@@ -179,8 +179,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLin
     g_nTransparency    = 255;
     g_nTransparencyPct = 0;
     g_nBeepVolume      = 50;
-    _tcsncpy( g_szDickPos, TEXT( "center" ), 19 );
-    g_szDickPos[ 19 ] = TEXT( '\0' );
+    _tcsncpy( g_szHorizontal, TEXT( "center" ), 19 );
+    g_szHorizontal[ 19 ] = TEXT( '\0' );
     _tcsncpy( g_szVertical, TEXT( "bottom" ), 19 );
     g_szVertical[ 19 ] = TEXT( '\0' );
 
@@ -444,28 +444,28 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
             /* Dick position control */
             if( wp == VK_LEFT )
             {
-                if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
+                if( _tcscmp( g_szHorizontal, TEXT( "right" ) ) == 0 )
                 {
-                    _tcsncpy( g_szDickPos, TEXT( "center" ), 19 );
-                    g_szDickPos[ 19 ] = TEXT( '\0' );
+                    _tcsncpy( g_szHorizontal, TEXT( "center" ), 19 );
+                    g_szHorizontal[ 19 ] = TEXT( '\0' );
                 }
-                else if( _tcscmp( g_szDickPos, TEXT( "center" ) ) == 0 )
+                else if( _tcscmp( g_szHorizontal, TEXT( "center" ) ) == 0 )
                 {
-                    _tcsncpy( g_szDickPos, TEXT( "left" ), 19 );
-                    g_szDickPos[ 19 ] = TEXT( '\0' );
+                    _tcsncpy( g_szHorizontal, TEXT( "left" ), 19 );
+                    g_szHorizontal[ 19 ] = TEXT( '\0' );
                 }
             }
             else if( wp == VK_RIGHT )
             {
-                if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
+                if( _tcscmp( g_szHorizontal, TEXT( "left" ) ) == 0 )
                 {
-                    _tcsncpy( g_szDickPos, TEXT( "center" ), 19 );
-                    g_szDickPos[ 19 ] = TEXT( '\0' );
+                    _tcsncpy( g_szHorizontal, TEXT( "center" ), 19 );
+                    g_szHorizontal[ 19 ] = TEXT( '\0' );
                 }
-                else if( _tcscmp( g_szDickPos, TEXT( "center" ) ) == 0 )
+                else if( _tcscmp( g_szHorizontal, TEXT( "center" ) ) == 0 )
                 {
-                    _tcsncpy( g_szDickPos, TEXT( "right" ), 19 );
-                    g_szDickPos[ 19 ] = TEXT( '\0' );
+                    _tcsncpy( g_szHorizontal, TEXT( "right" ), 19 );
+                    g_szHorizontal[ 19 ] = TEXT( '\0' );
                 }
             }
 
