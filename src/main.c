@@ -1,4 +1,4 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +48,7 @@ int g_bGraphStarted = 0;
 
 /* GUI state */
 int g_nGUIState = 0;
-TCHAR g_szInputBuf[ 16 ] = TEXT("");
+TCHAR g_szInputBuf[ 16 ] = TEXT( "" );
 int g_bWaitingForEnter = 0;
 int g_bPaused = 0;
 int g_bCompleted = 0;
@@ -70,13 +70,13 @@ int g_nTransparencyPct = 0;
 LARGE_INTEGER g_liLastInputTime = { 0 };
 
 /* Dick position */
-TCHAR g_szDickPos[ 20 ] = TEXT("");
+TCHAR g_szDickPos[ 20 ] = TEXT( "" );
 
 /* JSON file path */
-TCHAR g_szJsonFilePath[ MAX_PATH ] = TEXT("");
+TCHAR g_szJsonFilePath[ MAX_PATH ] = TEXT( "" );
 
-/* Vertical flip */
-int g_bFlipVertical = 0;
+/* Vertical */
+TCHAR g_szVertical[ 20 ] = TEXT( "" );
 
 /* Log flag */
 int g_bLog = 0;
@@ -96,30 +96,30 @@ LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM );
 int ResetAllState( void )
 {
     OPENFILENAME stOfn = { 0 };      /* open file dialog struct */
-    TCHAR szFilePath[ MAX_PATH ] = TEXT(""); /* selected file path */
+    TCHAR szFilePath[ MAX_PATH ] = TEXT( "" ); /* selected file path */
     DataSizes stDataSizes = { 0 };  /* json data sizes */
 
     /* Open file dialog */
     memset( &stOfn, 0, sizeof( OPENFILENAME ) );
     stOfn.lStructSize = sizeof( OPENFILENAME );
-    stOfn.lpstrFilter = TEXT("JSON Files (*.json)\0*.json\0All Files (*.*)\0*.*\0");
+    stOfn.lpstrFilter = TEXT( "JSON Files (*.json)\0*.json\0All Files (*.*)\0*.*\0" );
     stOfn.lpstrFile   = szFilePath;
     stOfn.nMaxFile    = MAX_PATH;
     stOfn.Flags       = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
-    stOfn.lpstrDefExt = TEXT("json");
+    stOfn.lpstrDefExt = TEXT( "json" );
     if( !GetOpenFileName( &stOfn ) )
     {
         return 0;
     }
     _tcsncpy( g_szJsonFilePath, szFilePath, MAX_PATH - 1 );
-    g_szJsonFilePath[ MAX_PATH - 1 ] = TEXT('\0');
+    g_szJsonFilePath[ MAX_PATH - 1 ] = TEXT( '\0' );
 
     FreeAllData();
 
     stDataSizes = CalculateDataSizes( g_szJsonFilePath );
     if( stDataSizes.nCustomerCount == 0 || stDataSizes.nMotionCount == 0 || stDataSizes.nSizeCount == 0 )
     {
-        _tprintf( TEXT("JSON Calculation Failed!\n") );
+        _tprintf( TEXT( "JSON Calculation Failed!\n" ) );
         return 0;
     }
 
@@ -135,7 +135,7 @@ int ResetAllState( void )
 
     if( !LoadAllDataFromJson( g_szJsonFilePath ) )
     {
-        _tprintf( TEXT("JSON Load Failed!\n") );
+        _tprintf( TEXT( "JSON Load Failed!\n" ) );
         FreeAllData();
         return 0;
     }
@@ -151,7 +151,7 @@ int ResetAllState( void )
 
     g_nGUIState = 0;
     memset( g_szInputBuf, 0, sizeof( TCHAR ) * 16 );
-    g_szInputBuf[ 0 ]  = TEXT('\0');
+    g_szInputBuf[ 0 ]  = TEXT( '\0' );
     g_bWaitingForEnter = 0;
     g_bPaused          = 0;
     g_bCompleted       = 0;
@@ -172,15 +172,17 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLin
     LONG nStyle = 0;                /* window style flags */
 
     _tcsncpy( szAppName, TEXT( "Dick Trainer" ), 31 );
-    szAppName[ 31 ] = TEXT('\0');
+    szAppName[ 31 ] = TEXT( '\0' );
 
     srand( ( unsigned int )time( NULL ) );
 
     g_nTransparency    = 255;
-    g_nTransparencyPct = 100;
+    g_nTransparencyPct = 0;
     g_nBeepVolume      = 50;
-    _tcsncpy( g_szDickPos, TEXT("center"), 19 );
-    g_szDickPos[ 19 ] = TEXT('\0');
+    _tcsncpy( g_szDickPos, TEXT( "center" ), 19 );
+    g_szDickPos[ 19 ] = TEXT( '\0' );
+    _tcsncpy( g_szVertical, TEXT( "bottom" ), 19 );
+    g_szVertical[ 19 ] = TEXT( '\0' );
 
     if( strstr( szCmdLine, "-log" ) )
     {
@@ -218,7 +220,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLin
     UpdateWindow( hwnd );
 
     SetLayeredWindowAttributes( hwnd, 0, ( BYTE )g_nTransparency, LWA_ALPHA );
-    g_nTransparencyPct = ( int )( g_nTransparency / 255.0 * 100.0 + 0.5 );
+    g_nTransparencyPct = ( int )( ( 255.0 - g_nTransparency ) / 255.0 * 100.0 + 0.5 );
 
     while( 1 )
     {
@@ -287,7 +289,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
     LARGE_INTEGER liNow = { 0 };    /* current time */
     double dElapsed = 0.0;          /* elapsed time */
     TCHAR szTransparencyLabel[ 16 ] = { 0 }; /* transparency label */
-    TCHAR szTransparencyValue[ 16 ] = TEXT(""); /* transparency value text */
+    TCHAR szTransparencyValue[ 16 ] = TEXT( "" ); /* transparency value text */
     HFONT hFontLabel = NULL;        /* label font */
     HFONT hFontValue = NULL;        /* value font */
     SIZE szLabelExtent = { 0 };     /* label text extent */
@@ -295,12 +297,12 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
     int nCenterX = 0;               /* overlay center X */
     int nBaseY = 0;                 /* overlay base Y */
     TCHAR szVolumeLabel[ 16 ] = { 0 }; /* volume label */
-    TCHAR szVolumeValue[ 16 ] = TEXT(""); /* volume value text */
+    TCHAR szVolumeValue[ 16 ] = TEXT( "" ); /* volume value text */
 
-    _tcsncpy( szTransparencyLabel, TEXT("OPACITY"), 15 );
-    szTransparencyLabel[ 15 ] = TEXT('\0');
-    _tcsncpy( szVolumeLabel, TEXT("VOLUME"), 15 );
-    szVolumeLabel[ 15 ] = TEXT('\0');
+    _tcsncpy( szTransparencyLabel, TEXT( "TRANSPARENT" ), 15 );
+    szTransparencyLabel[ 15 ] = TEXT( '\0' );
+    _tcsncpy( szVolumeLabel, TEXT( "VOLUME" ), 15 );
+    szVolumeLabel[ 15 ] = TEXT( '\0' );
 
     switch( uMsg )
     {
@@ -327,7 +329,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
                     if( nInputLen < 5 )
                     {
                         g_szInputBuf[ nInputLen ]     = ( TCHAR )( wp );
-                        g_szInputBuf[ nInputLen + 1 ] = TEXT('\0');
+                        g_szInputBuf[ nInputLen + 1 ] = TEXT( '\0' );
                     }
                 }
                 else if( wp >= VK_NUMPAD0 && wp <= VK_NUMPAD9 )
@@ -336,7 +338,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
                     if( nInputLen < 5 )
                     {
                         g_szInputBuf[ nInputLen ]     = ( TCHAR )( wp - VK_NUMPAD0 + '0' );
-                        g_szInputBuf[ nInputLen + 1 ] = TEXT('\0');
+                        g_szInputBuf[ nInputLen + 1 ] = TEXT( '\0' );
                     }
                 }
                 else if( wp == VK_BACK )
@@ -344,7 +346,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
                     nInputLen = ( int )_tcslen( g_szInputBuf );
                     if( nInputLen > 0 )
                     {
-                        g_szInputBuf[ nInputLen - 1 ] = TEXT('\0');
+                        g_szInputBuf[ nInputLen - 1 ] = TEXT( '\0' );
                     }
                 }
                 else if( wp == VK_RETURN )
@@ -411,18 +413,18 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
                 {
                     g_nTransparencyPct = 100;
                 }
-                g_nTransparency = ( int )( g_nTransparencyPct / 100.0 * 255.0 + 0.5 );
+                g_nTransparency = ( int )( ( 100.0 - g_nTransparencyPct ) / 100.0 * 255.0 + 0.5 );
                 SetLayeredWindowAttributes( hwnd, 0, ( BYTE )g_nTransparency, LWA_ALPHA );
                 QueryPerformanceCounter( &g_liTransparencyChangeTime );
             }
             else if( wp == VK_NEXT )
             {
                 g_nTransparencyPct -= 5;
-                if( g_nTransparencyPct < 5 )
+                if( g_nTransparencyPct < 0 )
                 {
-                    g_nTransparencyPct = 5;
+                    g_nTransparencyPct = 0;
                 }
-                g_nTransparency = ( int )( g_nTransparencyPct / 100.0 * 255.0 + 0.5 );
+                g_nTransparency = ( int )( ( 100.0 - g_nTransparencyPct ) / 100.0 * 255.0 + 0.5 );
                 SetLayeredWindowAttributes( hwnd, 0, ( BYTE )g_nTransparency, LWA_ALPHA );
                 QueryPerformanceCounter( &g_liTransparencyChangeTime );
             }
@@ -430,38 +432,40 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
             /* Vertical flip */
             if( wp == VK_DOWN )
             {
-                g_bFlipVertical = 1;
+                _tcsncpy( g_szVertical, TEXT( "bottom" ), 19 );
+                g_szVertical[ 19 ] = TEXT( '\0' );
             }
             else if( wp == VK_UP )
             {
-                g_bFlipVertical = 0;
+                _tcsncpy( g_szVertical, TEXT( "top" ), 19 );
+                g_szVertical[ 19 ] = TEXT( '\0' );
             }
 
             /* Dick position control */
             if( wp == VK_LEFT )
             {
-                if( _tcscmp( g_szDickPos, TEXT("right") ) == 0 )
+                if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
                 {
-                    _tcsncpy( g_szDickPos, TEXT("center"), 19 );
-                    g_szDickPos[ 19 ] = TEXT('\0');
+                    _tcsncpy( g_szDickPos, TEXT( "center" ), 19 );
+                    g_szDickPos[ 19 ] = TEXT( '\0' );
                 }
-                else if( _tcscmp( g_szDickPos, TEXT("center") ) == 0 )
+                else if( _tcscmp( g_szDickPos, TEXT( "center" ) ) == 0 )
                 {
-                    _tcsncpy( g_szDickPos, TEXT("left"), 19 );
-                    g_szDickPos[ 19 ] = TEXT('\0');
+                    _tcsncpy( g_szDickPos, TEXT( "left" ), 19 );
+                    g_szDickPos[ 19 ] = TEXT( '\0' );
                 }
             }
             else if( wp == VK_RIGHT )
             {
-                if( _tcscmp( g_szDickPos, TEXT("left") ) == 0 )
+                if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
                 {
-                    _tcsncpy( g_szDickPos, TEXT("center"), 19 );
-                    g_szDickPos[ 19 ] = TEXT('\0');
+                    _tcsncpy( g_szDickPos, TEXT( "center" ), 19 );
+                    g_szDickPos[ 19 ] = TEXT( '\0' );
                 }
-                else if( _tcscmp( g_szDickPos, TEXT("center") ) == 0 )
+                else if( _tcscmp( g_szDickPos, TEXT( "center" ) ) == 0 )
                 {
-                    _tcsncpy( g_szDickPos, TEXT("right"), 19 );
-                    g_szDickPos[ 19 ] = TEXT('\0');
+                    _tcsncpy( g_szDickPos, TEXT( "right" ), 19 );
+                    g_szDickPos[ 19 ] = TEXT( '\0' );
                 }
             }
 
@@ -505,10 +509,10 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
             dElapsed = ( double )( liNow.QuadPart - g_liTransparencyChangeTime.QuadPart ) / ( double )g_liFrequency.QuadPart;
             if( g_liTransparencyChangeTime.QuadPart != 0 && dElapsed < 1.0 )
             {
-                _sntprintf( szTransparencyValue, 16, TEXT("%d%%"), g_nTransparencyPct );
+                _sntprintf( szTransparencyValue, 16, TEXT( "%d%%" ), g_nTransparencyPct );
 
-                hFontLabel = CreateFont( 28, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
-                hFontValue = CreateFont( 48, 0, 0, 0, FW_BOLD,   0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+                hFontLabel = CreateFont( 28, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
+                hFontValue = CreateFont( 48, 0, 0, 0, FW_BOLD,   0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
                 SetBkMode( hdcMemory, TRANSPARENT );
 
                 SelectObject( hdcMemory, hFontLabel );
@@ -536,10 +540,10 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
             dElapsed = ( double )( liNow.QuadPart - g_liVolumeChangeTime.QuadPart ) / ( double )g_liFrequency.QuadPart;
             if( g_liVolumeChangeTime.QuadPart != 0 && dElapsed < 1.0 )
             {
-                _sntprintf( szVolumeValue, 16, TEXT("%d%%"), g_nBeepVolume );
+                _sntprintf( szVolumeValue, 16, TEXT( "%d%%" ), g_nBeepVolume );
 
-                hFontLabel = CreateFont( 28, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
-                hFontValue = CreateFont( 48, 0, 0, 0, FW_BOLD,   0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+                hFontLabel = CreateFont( 28, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
+                hFontValue = CreateFont( 48, 0, 0, 0, FW_BOLD,   0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
                 SetBkMode( hdcMemory, TRANSPARENT );
 
                 SelectObject( hdcMemory, hFontLabel );

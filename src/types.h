@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <windows.h>
 
@@ -133,6 +133,7 @@ extern int g_nTransparency;
 
 /* Dick position */
 extern TCHAR g_szDickPos[ 20 ];
+extern TCHAR g_szVertical[ 20 ];
 
 /* Performance timing */
 extern LARGE_INTEGER g_liFrequency;

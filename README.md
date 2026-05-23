@@ -1,4 +1,4 @@
-# DickTrainer
+﻿# DickTrainer
 
 ## Third-party Libraries
 

@@ -1,4 +1,4 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,7 +81,7 @@ double GenerateSample( const TCHAR *szDist, double dMean, double dStd )
 {
     double dU = 0.0;                /* uniform random value [0,1) */
 
-    if( _tcscmp( szDist, TEXT("uniform") ) == 0 )
+    if( _tcscmp( szDist, TEXT( "uniform" ) ) == 0 )
     {
         dU = ( double )rand() / ( ( double )RAND_MAX + 1.0 );
         return ( dMean - dStd ) + dU * ( dStd * 2.0 );

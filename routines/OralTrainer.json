@@ -1,5 +1,6 @@
-{
-  "transparent" : 10,
+﻿{
+  "volume"      :100,
+  "transparent" : 20,
   "dick_pos" : "left",
   "customer" :
   {

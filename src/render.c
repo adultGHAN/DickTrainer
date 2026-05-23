@@ -1,4 +1,4 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,7 +12,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-extern int g_bFlipVertical;
 
 void RenderInputScreen( HDC hdcMemory, int nWidth, int nHeight )
 {
@@ -22,11 +21,11 @@ void RenderInputScreen( HDC hdcMemory, int nWidth, int nHeight )
     SetTextColor( hdcMemory, RGB( 180, 220, 255 ) );
     SetBkMode( hdcMemory, TRANSPARENT );
 
-    hFont = CreateFont( 32, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+    hFont = CreateFont( 32, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
     SelectObject( hdcMemory, hFont );
-    TextOut( hdcMemory, nWidth / 2 - 150, nHeight / 2 - 40, TEXT("ENTER CUSTOMER COUNT"), 20 );
+    TextOut( hdcMemory, nWidth / 2 - 150, nHeight / 2 - 40, TEXT( "ENTER CUSTOMER COUNT" ), 20 );
 
-    _sntprintf( szDisplayBuf, 32, TEXT("[ %s_ ]"), g_szInputBuf );
+    _sntprintf( szDisplayBuf, 32, TEXT( "[ %s_ ]" ), g_szInputBuf );
     TextOut( hdcMemory, nWidth / 2 - 50, nHeight / 2 + 10, szDisplayBuf, ( int )_tcslen( szDisplayBuf ) );
 
     DeleteObject( hFont );
@@ -48,32 +47,32 @@ void RenderWaitingScreen( HDC hdcMemory, int nWidth, int nHeight )
     SetTextColor( hdcMemory, RGB( 255, 255, 100 ) );
     SetBkMode( hdcMemory, TRANSPARENT );
 
-    hFont = CreateFont( 40, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+    hFont = CreateFont( 40, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
     SelectObject( hdcMemory, hFont );
 
     /* Measure text sizes - verify customerIdx */
-    _sntprintf( szTextBuffer, 128, TEXT("Customer %d"), g_pstSequence[ g_nCurrentAct ].nCustomerIdx );
+    _sntprintf( szTextBuffer, 128, TEXT( "Customer %d" ), g_pstSequence[ g_nCurrentAct ].nCustomerIdx );
     GetTextExtentPoint32( hdcMemory, szTextBuffer, ( int )_tcslen( szTextBuffer ), &stTextExtent1 );
 
-    _sntprintf( szTextBuffer, 128, TEXT("Shape: [ %s ]"), pCurrentAct->szShape );
+    _sntprintf( szTextBuffer, 128, TEXT( "Shape: [ %s ]" ), pCurrentAct->szShape );
     GetTextExtentPoint32( hdcMemory, szTextBuffer, ( int )_tcslen( szTextBuffer ), &stTextExtent2 );
 
-    GetTextExtentPoint32( hdcMemory, TEXT("Press [ENTER] to Start"), 22, &stTextExtent3 );
+    GetTextExtentPoint32( hdcMemory, TEXT( "Press [ENTER] to Start" ), 22, &stTextExtent3 );
 
     /* Calculate total height (line spacing 40px) */
     nTotalHeight = stTextExtent1.cy + stTextExtent2.cy + stTextExtent3.cy + 80;
     nStartY = nHeight / 2 - nTotalHeight / 2;
 
     /* First line */
-    _sntprintf( szTextBuffer, 128, TEXT("Customer %d"), pCurrentAct->nCustomerIdx );
+    _sntprintf( szTextBuffer, 128, TEXT( "Customer %d" ), pCurrentAct->nCustomerIdx );
     TextOut( hdcMemory, nWidth / 2 - stTextExtent1.cx / 2, nStartY, szTextBuffer, ( int )_tcslen( szTextBuffer ) );
 
     /* Second line */
-    _sntprintf( szTextBuffer, 128, TEXT("Shape: [ %s ]"), g_pstSequence[ g_nCurrentAct ].szShape );
+    _sntprintf( szTextBuffer, 128, TEXT( "Shape: [ %s ]" ), g_pstSequence[ g_nCurrentAct ].szShape );
     TextOut( hdcMemory, nWidth / 2 - stTextExtent2.cx / 2, nStartY + stTextExtent1.cy + 40, szTextBuffer, ( int )_tcslen( szTextBuffer ) );
 
     /* Third line */
-    TextOut( hdcMemory, nWidth / 2 - stTextExtent3.cx / 2, nStartY + stTextExtent1.cy + stTextExtent2.cy + 80, TEXT("Press [ENTER] to Start"), 22 );
+    TextOut( hdcMemory, nWidth / 2 - stTextExtent3.cx / 2, nStartY + stTextExtent1.cy + stTextExtent2.cy + 80, TEXT( "Press [ENTER] to Start" ), 22 );
 
     DeleteObject( hFont );
 }
@@ -91,26 +90,26 @@ void RenderCompletionScreen( HDC hdcMemory, int nWidth, int nHeight )
     TCHAR szSubtitleText[ 128 ] = { 0 }; /* subtitle string */
     TCHAR szRestartText[ 64 ] = { 0 }; /* restart string */
 
-    _tcsncpy( szTitleText, TEXT("Service Completed!"), 31 );
-    szTitleText[ 31 ] = TEXT('\0');
-    _tcsncpy( szSubtitleText, TEXT("You have served all customers. Thank you for your hard work."), 127 );
-    szSubtitleText[ 127 ] = TEXT('\0');
-    _tcsncpy( szRestartText, TEXT("Press [ENTER] to play again"), 63 );
-    szRestartText[ 63 ] = TEXT('\0');
+    _tcsncpy( szTitleText, TEXT( "Service Completed!" ), 31 );
+    szTitleText[ 31 ] = TEXT( '\0' );
+    _tcsncpy( szSubtitleText, TEXT( "You have served all customers. Thank you for your hard work." ), 127 );
+    szSubtitleText[ 127 ] = TEXT( '\0' );
+    _tcsncpy( szRestartText, TEXT( "Press [ENTER] to play again" ), 63 );
+    szRestartText[ 63 ] = TEXT( '\0' );
 
     SetTextColor( hdcMemory, RGB( 100, 255, 100 ) );
     SetBkMode( hdcMemory, TRANSPARENT );
 
     /* Title font */
-    hFontTitle = CreateFont( 60, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+    hFontTitle = CreateFont( 60, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
     SelectObject( hdcMemory, hFontTitle );
     GetTextExtentPoint32( hdcMemory, szTitleText, ( int )_tcslen( szTitleText ), &stTitleExtent );
 
     /* Subtitle font */
-    hFontSubtitle = CreateFont( 28, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+    hFontSubtitle = CreateFont( 28, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
 
     /* Restart message font */
-    hFontRestartMsg = CreateFont( 24, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+    hFontRestartMsg = CreateFont( 24, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
 
     /* Calculate Start Y */
     nStartY = nHeight / 2 - ( stTitleExtent.cy + 40 ) / 2;
@@ -233,11 +232,11 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     nBottomY = nHeight - nBottomMargin;
 
     /* Set dick position based on dick_pos */
-    if( _tcscmp( g_szDickPos, TEXT("left") ) == 0 )
+    if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
     {
         nPillarX = nWidth / 6;
     }
-    else if( _tcscmp( g_szDickPos, TEXT("right") ) == 0 )
+    else if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
     {
         nPillarX = nWidth * 5 / 6;
     }
@@ -258,7 +257,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     DeleteObject( hInfoPanelBrush );
 
     /* Draw horizontal grid lines */
-    if( g_bFlipVertical )
+    if( _tcscmp( g_szVertical, TEXT( "top" ) ) == 0 )
     {
         SetGraphicsMode( hdcMemory, GM_ADVANCED );
         stXf.eM11 = 1.0f; stXf.eM12 = 0.0f;
@@ -346,7 +345,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
 
     dNextSecond = ceil( dAbsoluteTime );
 
-    if( _tcscmp( g_szDickPos, TEXT("left") ) == 0 )
+    if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
     {
         for( dTimeStep = dNextSecond; dTimeStep <= dAbsoluteTime + nWidth / dPixelsPerSecond; dTimeStep += 1.0 )
         {
@@ -359,7 +358,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
             LineTo( hdcMemory, nVerticalX, nBottomY );
         }
     }
-    else if( _tcscmp( g_szDickPos, TEXT("right") ) == 0 )
+    else if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
     {
         for( dTimeStep = dNextSecond; dTimeStep <= dAbsoluteTime + nWidth / dPixelsPerSecond; dTimeStep += 1.0 )
         {
@@ -468,7 +467,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     }
 
     /* Draw graph path over time */
-    if( _tcscmp( g_szDickPos, TEXT("left") ) == 0 )
+    if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
     {
         for( nPixelX = 0; nPixelX < nWidth; nPixelX++ )
         {
@@ -514,7 +513,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
             }
         }
     }
-    else if( _tcscmp( g_szDickPos, TEXT("right") ) == 0 )
+    else if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
     {
         for( nPixelX = nWidth - 1; nPixelX >= 0; nPixelX-- )
         {
@@ -644,7 +643,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     SelectObject( hdcMemory, hMarkerPen );
     SelectObject( hdcMemory, GetStockObject( NULL_BRUSH ) );
 
-    if( _tcscmp( g_szDickPos, TEXT("left") ) == 0 )
+    if( _tcscmp( g_szDickPos, TEXT( "left" ) ) == 0 )
     {
         for( nGridIndex = g_nCurrentCustomerStartAct; nGridIndex < g_nCurrentCustomerEndAct; nGridIndex++ )
         {
@@ -662,7 +661,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
             }
         }
     }
-    else if( _tcscmp( g_szDickPos, TEXT("right") ) == 0 )
+    else if( _tcscmp( g_szDickPos, TEXT( "right" ) ) == 0 )
     {
         for( nGridIndex = g_nCurrentCustomerStartAct; nGridIndex < g_nCurrentCustomerEndAct; nGridIndex++ )
         {
@@ -719,7 +718,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     DeleteObject( hCurrentPosBrush );
 
     /* Display info text */
-    if( g_bFlipVertical )
+    if( _tcscmp( g_szVertical, TEXT( "top" ) ) == 0 )
     {
         stXf.eM11 = 1.0f; stXf.eM12 = 0.0f;
         stXf.eM21 = 0.0f; stXf.eM22 = 1.0f;
@@ -731,7 +730,7 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     SetBkMode( hdcMemory, TRANSPARENT );
 
     nFontSize = max( 12, ( nInfoHeightActual / 6 ) );
-    hFontInfo = CreateFont( nFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+    hFontInfo = CreateFont( nFontSize, 0, 0, 0, FW_NORMAL, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
 
     pCurrentAct = &g_pstSequence[ g_nCurrentAct ];
     nStartY       = nInfoHeightActual / 8;
@@ -740,30 +739,30 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     nLine1StartX  = ( int )( nColumnSpacing * 0.5 );
 
     SelectObject( hdcMemory, hFontInfo );
-    TextOut( hdcMemory, nLine1StartX, nStartY, TEXT("customer"), 8 );
-    _sntprintf( szTextBuffer, 128, TEXT("%d / %d"), pCurrentAct->nCustomerIdx, pCurrentAct->nTotalCustomers );
+    TextOut( hdcMemory, nLine1StartX, nStartY, TEXT( "customer" ), 8 );
+    _sntprintf( szTextBuffer, 128, TEXT( "%d / %d" ), pCurrentAct->nCustomerIdx, pCurrentAct->nTotalCustomers );
     TextOut( hdcMemory, nLine1StartX + nColumnSpacing, nStartY, szTextBuffer, ( int )_tcslen( szTextBuffer ) );
 
-    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 2, nStartY, TEXT("customer"), 8 );
-    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 2, ( int )( nStartY + nFontSize + 2 ), TEXT("level"), 5 );
-    _sntprintf( szTextBuffer, 128, TEXT("%.1f"), pCurrentAct->dCustomerLevel );
+    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 2, nStartY, TEXT( "customer" ), 8 );
+    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 2, ( int )( nStartY + nFontSize + 2 ), TEXT( "level" ), 5 );
+    _sntprintf( szTextBuffer, 128, TEXT( "%.1f" ), pCurrentAct->dCustomerLevel );
     TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 3, nStartY, szTextBuffer, ( int )_tcslen( szTextBuffer ) );
 
-    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 4, nStartY, TEXT("course"), 6 );
-    _sntprintf( szTextBuffer, 128, TEXT("%d / %d"), pCurrentAct->nCourseIdx, pCurrentAct->nTotalCourses );
+    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 4, nStartY, TEXT( "course" ), 6 );
+    _sntprintf( szTextBuffer, 128, TEXT( "%d / %d" ), pCurrentAct->nCourseIdx, pCurrentAct->nTotalCourses );
     TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 5, nStartY, szTextBuffer, ( int )_tcslen( szTextBuffer ) );
 
     /* Second line */
-    TextOut( hdcMemory, nLine1StartX, ( int )( nStartY + nLineGap ), TEXT("motion"), 6 );
+    TextOut( hdcMemory, nLine1StartX, ( int )( nStartY + nLineGap ), TEXT( "motion" ), 6 );
     TextOut( hdcMemory, nLine1StartX + nColumnSpacing, ( int )( nStartY + nLineGap ), pCurrentAct->szMotionName, ( int )_tcslen( pCurrentAct->szMotionName ) );
 
-    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 2, ( int )( nStartY + nLineGap ), TEXT("motion"), 6 );
-    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 2, ( int )( nStartY + nLineGap + nFontSize + 2 ), TEXT("level"), 5 );
-    _sntprintf( szTextBuffer, 128, TEXT("%.1f"), pCurrentAct->dMotionLevel );
+    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 2, ( int )( nStartY + nLineGap ), TEXT( "motion" ), 6 );
+    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 2, ( int )( nStartY + nLineGap + nFontSize + 2 ), TEXT( "level" ), 5 );
+    _sntprintf( szTextBuffer, 128, TEXT( "%.1f" ), pCurrentAct->dMotionLevel );
     TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 3, ( int )( nStartY + nLineGap ), szTextBuffer, ( int )_tcslen( szTextBuffer ) );
 
-    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 4, ( int )( nStartY + nLineGap ), TEXT("reps"), 4 );
-    _sntprintf( szTextBuffer, 128, TEXT("%d / %d"), pCurrentAct->nCurrentRep, pCurrentAct->nTotalReps );
+    TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 4, ( int )( nStartY + nLineGap ), TEXT( "reps" ), 4 );
+    _sntprintf( szTextBuffer, 128, TEXT( "%d / %d" ), pCurrentAct->nCurrentRep, pCurrentAct->nTotalReps );
     TextOut( hdcMemory, nLine1StartX + nColumnSpacing * 5, ( int )( nStartY + nLineGap ), szTextBuffer, ( int )_tcslen( szTextBuffer ) );
 
     DeleteObject( hFontInfo );
@@ -771,13 +770,13 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
     /* Display pause message */
     if( g_bPaused )
     {
-        hFontPause = CreateFont( 80, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT("Consolas") );
+        hFontPause = CreateFont( 80, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 0, 0, TEXT( "Consolas" ) );
         SelectObject( hdcMemory, hFontPause );
         SetTextColor( hdcMemory, RGB( 255, 100, 100 ) );
         SetBkMode( hdcMemory, TRANSPARENT );
 
-        GetTextExtentPoint32( hdcMemory, TEXT("PAUSE"), 5, &stPauseExtent );
-        TextOut( hdcMemory, nWidth / 2 - stPauseExtent.cx / 2, nHeight / 2 - stPauseExtent.cy / 2, TEXT("PAUSE"), 5 );
+        GetTextExtentPoint32( hdcMemory, TEXT( "PAUSE" ), 5, &stPauseExtent );
+        TextOut( hdcMemory, nWidth / 2 - stPauseExtent.cx / 2, nHeight / 2 - stPauseExtent.cy / 2, TEXT( "PAUSE" ), 5 );
 
         DeleteObject( hFontPause );
     }

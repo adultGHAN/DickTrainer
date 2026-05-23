@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -50,7 +50,7 @@ DataSizes CalculateDataSizes( const TCHAR *szFilename )
     long nLen = 0;
 
     /* Open file */
-    hFp = _tfopen( szFilename, TEXT("rb") );
+    hFp = _tfopen( szFilename, TEXT( "rb" ) );
     if( hFp == NULL )
     {
         return stSizes;
@@ -194,9 +194,11 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
     cJSON *pSStd = NULL;            /* size distribution std */
     cJSON *pShape = NULL;           /* shape JSON object */
 
-    /* transparency and dick position */
+    /* volume, transparency and dick position */
+    cJSON *pVolumeObj = NULL;       /* volume JSON object */
     cJSON *pTransObj = NULL;        /* transparency JSON object */
     cJSON *pDickposObj = NULL;      /* dick position JSON object */
+    int nVolumeVal = 0;             /* volume value (0-100) */
     int nTransVal = 0;              /* transparency value (0-100) */
 
     /* motion basic info */
@@ -232,7 +234,7 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
     int nActionIdx = 0;             /* action index */
 
     /* Open file */
-    hFp = _tfopen( szFilename, TEXT("rb") );
+    hFp = _tfopen( szFilename, TEXT( "rb" ) );
     if( hFp == NULL )
     {
         return 0;
@@ -260,6 +262,59 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
     {
         return 0;
     }
+
+    /* ===== Load volume setting ===== */
+    {
+        pVolumeObj = cJSON_GetObjectItem( pJson, "volume" );
+        if( pVolumeObj )
+        {
+            nVolumeVal = ( int )pVolumeObj->valuedouble;
+            if( nVolumeVal < 0 )
+            {
+                nVolumeVal = 0;
+            }
+            if( nVolumeVal > 100 )
+            {
+                nVolumeVal = 100;
+            }
+            g_nBeepVolume = nVolumeVal;
+        }
+    }
+
+    /* ===== Load transparency setting ===== */
+    {
+        pTransObj = cJSON_GetObjectItem( pJson, "transparent" );
+        if( pTransObj )
+        {
+            /* JSON value: 100=fully transparent, 0=opaque; convert to 0-255 alpha */
+            nTransVal = ( int )pTransObj->valuedouble;
+            g_nTransparency = ( int )( ( 100.0 - nTransVal ) / 100.0 * 255.0 );
+            if( g_nTransparency < 0 )
+            {
+                g_nTransparency = 0;
+            }
+            if( g_nTransparency > 255 )
+            {
+                g_nTransparency = 255;
+            }
+        }
+    }
+
+    /* ===== Load dick position setting ===== */
+    {
+        pDickposObj = cJSON_GetObjectItem( pJson, "dick_pos" );
+        if( pDickposObj && pDickposObj->valuestring )
+        {
+            TCHAR *pszTmp = AllocTCHARFromUTF8( pDickposObj->valuestring );
+            if( pszTmp )
+            {
+                _tcsncpy( g_szDickPos, pszTmp, 19 );
+                g_szDickPos[ 19 ] = TEXT( '\0' );
+                free( pszTmp );
+            }
+        }
+    }
+
 
     /* ===== Load customer data ===== */
     pCustomerObj = cJSON_GetObjectItem( pJson, "customer" );
@@ -318,40 +373,6 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
             g_pstSizes[ g_nSizeCount ].dLevel = cJSON_GetObjectItem( pMotionItem, "level" )->valuedouble;
             g_pstSizes[ g_nSizeCount ].szShape = AllocTCHARFromUTF8( ( pShape && pShape->valuestring ) ? pShape->valuestring : "" );
             g_nSizeCount++;
-        }
-    }
-
-    /* ===== Load transparency setting ===== */
-    {
-        pTransObj = cJSON_GetObjectItem( pJson, "transparent" );
-        if( pTransObj )
-        {
-            /* Assume JSON value is 0-100 range, convert to 0-255 */
-            nTransVal = ( int )pTransObj->valuedouble;
-            g_nTransparency = ( int )( ( 100.0 - nTransVal ) / 100.0 * 255.0 );
-            if( g_nTransparency < 0 )
-            {
-                g_nTransparency = 0;
-            }
-            if( g_nTransparency > 255 )
-            {
-                g_nTransparency = 255;
-            }
-        }
-    }
-
-    /* ===== Load dick position setting ===== */
-    {
-        pDickposObj = cJSON_GetObjectItem( pJson, "dick_pos" );
-        if( pDickposObj && pDickposObj->valuestring )
-        {
-            TCHAR *pszTmp = AllocTCHARFromUTF8( pDickposObj->valuestring );
-            if( pszTmp )
-            {
-                _tcsncpy( g_szDickPos, pszTmp, 19 );
-                g_szDickPos[ 19 ] = TEXT('\0');
-                free( pszTmp );
-            }
         }
     }
 
@@ -660,7 +681,7 @@ void AppendMotionWithIntervals( int nMotionIdx, double dTargetLevel, int nCustom
         pSequenceAction->nCurrentRep = 1;
         pSequenceAction->nTotalReps = 1;
 
-        pSequenceAction->szMotionName = _tcsdup( TEXT("ready") );
+        pSequenceAction->szMotionName = _tcsdup( TEXT( "ready" ) );
         pSequenceAction->szShape = _tcsdup( szShape );
 
         /* Accumulate time */
@@ -737,7 +758,7 @@ void AppendMotionWithIntervals( int nMotionIdx, double dTargetLevel, int nCustom
         pSequenceAction->nCurrentRep = pMotionLevel->nReps;
         pSequenceAction->nTotalReps = pMotionLevel->nReps;
 
-        pSequenceAction->szMotionName = _tcsdup( TEXT("rest") );
+        pSequenceAction->szMotionName = _tcsdup( TEXT( "rest" ) );
         pSequenceAction->szShape = _tcsdup( szShape );
 
         /* Accumulate time */
@@ -786,11 +807,11 @@ void GenerateSequences( int nCount )
     /* Find special motion indices */
     for( nCustomerIdx = 0; nCustomerIdx < g_nMotionCount; nCustomerIdx++ )
     {
-        if( !_tcscmp( g_pstMotions[ nCustomerIdx ].szName, TEXT("warmup") ) )
+        if( !_tcscmp( g_pstMotions[ nCustomerIdx ].szName, TEXT( "warmup" ) ) )
         {
             nWarmupMotionIdx = nCustomerIdx;
         }
-        if( !_tcscmp( g_pstMotions[ nCustomerIdx ].szName, TEXT("cum") ) )
+        if( !_tcscmp( g_pstMotions[ nCustomerIdx ].szName, TEXT( "cum" ) ) )
         {
             nCumMotionIdx = nCustomerIdx;
         }
@@ -834,7 +855,7 @@ void GenerateSequences( int nCount )
 
         if( g_bLog )
         {
-            _tprintf( TEXT("[Customer %d] generated_level=%.4f  selected_customer_idx=%d  level=%.4f  course=%d\n"),
+            _tprintf( TEXT( "[Customer %d] generated_level=%.4f  selected_customer_idx=%d  level=%.4f  course=%d\n" ),
                 nCustomerIdx + 1,
                 dGeneratedCustomerLevel,
                 nSelectedCustomerIdx,
@@ -876,7 +897,7 @@ void GenerateSequences( int nCount )
 
         if( g_bLog )
         {
-            _tprintf( TEXT("[Customer %d] generated_size_level=%.4f  selected_size=%s  level=%.4f\n"),
+            _tprintf( TEXT( "[Customer %d] generated_size_level=%.4f  selected_size=%s  level=%.4f\n" ),
                 nCustomerIdx + 1,
                 dGeneratedSizeLevel,
                 stSelectedSize.szShape,
@@ -915,7 +936,7 @@ void GenerateSequences( int nCount )
 
                 if( g_bLog )
                 {
-                    _tprintf( TEXT("[Customer %d] [warmup] motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n"),
+                    _tprintf( TEXT( "[Customer %d] [warmup] motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n" ),
                         nCustomerIdx + 1,
                         stSelectedCustomer.nMotionAdmend,
                         g_pstMotions[ nWarmupMotionIdx ].dMean,
@@ -969,7 +990,7 @@ void GenerateSequences( int nCount )
 
                 if( g_bLog )
                 {
-                    _tprintf( TEXT("[Customer %d] [course %d] motion=%s  motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n"),
+                    _tprintf( TEXT( "[Customer %d] [course %d] motion=%s  motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n" ),
                         nCustomerIdx + 1,
                         nCourseIdx + 1,
                         g_pstMotions[ nSelectedMotionIdx ].szName,
@@ -1016,7 +1037,7 @@ void GenerateSequences( int nCount )
 
                 if( g_bLog )
                 {
-                    _tprintf( TEXT("[Customer %d] [cum] motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n"),
+                    _tprintf( TEXT( "[Customer %d] [cum] motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n" ),
                         nCustomerIdx + 1,
                         stSelectedCustomer.nMotionAdmend,
                         g_pstMotions[ nCumMotionIdx ].dMean,
