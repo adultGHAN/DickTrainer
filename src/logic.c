@@ -1,4 +1,4 @@
-﻿#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -78,6 +78,81 @@ DataSizes CalculateDataSizes( const TCHAR *szFilename )
     if( !pJson )
     {
         return stSizes;
+    }
+
+    /* ===== Check required mode field ===== */
+    {
+        cJSON *pModeObj = NULL;             /* mode JSON object */
+        cJSON *pDataArr = NULL;             /* data array */
+        cJSON *pDataItem = NULL;            /* data item */
+        cJSON *pMotionArrSeq = NULL;        /* motion array in data item */
+        cJSON *pMotionItemSeq = NULL;       /* motion item */
+        cJSON *pRepsObjSeq = NULL;          /* reps object */
+        cJSON *pActsSeq = NULL;             /* act array */
+        cJSON *pActItemSeq = NULL;          /* act item */
+        int nDataCount = 0;                 /* data array count */
+        int nTotalSeqCount = 0;             /* total sequence count */
+        int nActCountSeq = 0;               /* act count per level */
+        int nRepsSeq = 0;                   /* reps per level */
+
+        pModeObj = cJSON_GetObjectItem( pJson, "mode" );
+        if( !pModeObj || !pModeObj->valuestring )
+        {
+            cJSON_Delete( pJson );
+            return stSizes;
+        }
+
+        /* Sequence mode: calculate from data array */
+        if( strcmp( pModeObj->valuestring, "sequence" ) == 0 )
+        {
+            pDataArr = cJSON_GetObjectItem( pJson, "data" );
+            if( pDataArr )
+            {
+                cJSON_ArrayForEach( pDataItem, pDataArr )
+                {
+                    nDataCount++;
+                    pMotionArrSeq = cJSON_GetObjectItem( pDataItem, "motion" );
+                    if( pMotionArrSeq )
+                    {
+                        cJSON_ArrayForEach( pMotionItemSeq, pMotionArrSeq )
+                        {
+                            nActCountSeq = 0;
+                            nRepsSeq = 1;
+                            pRepsObjSeq = cJSON_GetObjectItem( pMotionItemSeq, "reps" );
+                            if( pRepsObjSeq )
+                            {
+                                nRepsSeq = pRepsObjSeq->valueint;
+                            }
+                            pActsSeq = cJSON_GetObjectItem( pMotionItemSeq, "act" );
+                            if( pActsSeq )
+                            {
+                                cJSON_ArrayForEach( pActItemSeq, pActsSeq )
+                                {
+                                    nActCountSeq++;
+                                }
+                            }
+                            /* pre(1) + acts*reps + post(1) */
+                            nTotalSeqCount += 2 + ( nActCountSeq * nRepsSeq );
+                        }
+                    }
+                }
+            }
+
+            stSizes.nCustomerCount = nDataCount;
+            stSizes.nMotionCount = 0;
+            stSizes.nSizeCount = 0;
+            stSizes.nMaxSequenceCount = nTotalSeqCount + 10;
+
+            cJSON_Delete( pJson );
+            return stSizes;
+        }
+
+        /* Random mode validation */
+        if( strcmp( pModeObj->valuestring, "random" ) != 0 )
+        {
+            cJSON_Delete( pJson );
+            return stSizes;
+        }
     }
 
     /* Customer count and max course value */
@@ -170,6 +245,9 @@ DataSizes CalculateDataSizes( const TCHAR *szFilename )
     return stSizes;
 }
 
+/* --- Forward Declaration --- */
+static int LoadSequenceDataFromJson( cJSON *pJson );
+
 /* --- Data Loading --- */
 int LoadAllDataFromJson( const TCHAR *szFilename )
 {
@@ -199,6 +277,7 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
     cJSON *pTransObj = NULL;        /* transparency JSON object */
     cJSON *pDickposObj = NULL;      /* horizontal position JSON object */
     cJSON *pVerticalObj = NULL;     /* vertical position JSON object */
+    TCHAR *pszConvertedStr = NULL;  /* temporary buffer for cJSON to TCHAR conversion */
     int nVolumeVal = 0;             /* volume value (0-100) */
     int nTransVal = 0;              /* transparency value (0-100) */
 
@@ -264,6 +343,37 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
         return 0;
     }
 
+    /* ===== Check required mode field ===== */
+    {
+        cJSON *pModeObj = NULL;             /* mode JSON object */
+        int nLoadResult = 0;                /* load result */
+
+        pModeObj = cJSON_GetObjectItem( pJson, "mode" );
+        if( !pModeObj || !pModeObj->valuestring )
+        {
+            cJSON_Delete( pJson );
+            return 0;
+        }
+
+        if( strcmp( pModeObj->valuestring, "sequence" ) == 0 )
+        {
+            _tcsncpy( g_szMode, TEXT( "sequence" ), 19 );
+            g_szMode[ 19 ] = TEXT( '\0' );
+            nLoadResult = LoadSequenceDataFromJson( pJson );
+            cJSON_Delete( pJson );
+            return nLoadResult;
+        }
+
+        if( strcmp( pModeObj->valuestring, "random" ) != 0 )
+        {
+            cJSON_Delete( pJson );
+            return 0;
+        }
+
+        _tcsncpy( g_szMode, TEXT( "random" ), 19 );
+        g_szMode[ 19 ] = TEXT( '\0' );
+    }
+
     /* ===== Load volume setting ===== */
     {
         pVolumeObj = cJSON_GetObjectItem( pJson, "volume" );
@@ -306,12 +416,13 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
         pDickposObj = cJSON_GetObjectItem( pJson, "horizontal" );
         if( pDickposObj && pDickposObj->valuestring )
         {
-            TCHAR *pszTmp = AllocTCHARFromUTF8( pDickposObj->valuestring );
-            if( pszTmp )
+            pszConvertedStr = AllocTCHARFromUTF8( pDickposObj->valuestring );
+            if( pszConvertedStr )
             {
-                _tcsncpy( g_szHorizontal, pszTmp, 19 );
+                _tcsncpy( g_szHorizontal, pszConvertedStr, 19 );
                 g_szHorizontal[ 19 ] = TEXT( '\0' );
-                free( pszTmp );
+                free( pszConvertedStr );
+                pszConvertedStr = NULL;
             }
         }
     }
@@ -320,12 +431,13 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
         pVerticalObj = cJSON_GetObjectItem( pJson, "vertical" );
         if( pVerticalObj && pVerticalObj->valuestring )
         {
-            TCHAR *pszTmp = AllocTCHARFromUTF8( pVerticalObj->valuestring );
-            if( pszTmp )
+            pszConvertedStr = AllocTCHARFromUTF8( pVerticalObj->valuestring );
+            if( pszConvertedStr )
             {
-                _tcsncpy( g_szVertical, pszTmp, 19 );
+                _tcsncpy( g_szVertical, pszConvertedStr, 19 );
                 g_szVertical[ 19 ] = TEXT( '\0' );
-                free( pszTmp );
+                free( pszConvertedStr );
+                pszConvertedStr = NULL;
             }
         }
     }
@@ -561,6 +673,424 @@ int LoadAllDataFromJson( const TCHAR *szFilename )
     }
 
     cJSON_Delete( pJson );
+    return 1;
+}
+
+/* --- Sequence Mode Loader --- */
+static int LoadSequenceDataFromJson( cJSON *pJson )
+{
+    /* settings */
+    cJSON *pVolumeObj = NULL;           /* volume JSON object */
+    cJSON *pTransObj = NULL;            /* transparency JSON object */
+    cJSON *pDickposObj = NULL;          /* horizontal position JSON object */
+    cJSON *pVerticalObj = NULL;         /* vertical position JSON object */
+    TCHAR *pszConvertedStr = NULL;      /* temporary TCHAR conversion buffer */
+    int nVolumeVal = 0;                 /* volume value */
+    int nTransVal = 0;                  /* transparency value */
+
+    /* data traversal */
+    cJSON *pDataArr = NULL;             /* data array */
+    cJSON *pDataItem = NULL;            /* data item */
+    cJSON *pCustomerObj = NULL;         /* customer object in data item */
+    cJSON *pSizeObj = NULL;             /* size object in data item */
+    cJSON *pMotionArr = NULL;           /* motion array in data item */
+    cJSON *pMotionItem = NULL;          /* motion item */
+
+    /* motion parsing */
+    cJSON *pMotionName = NULL;          /* motion name */
+    cJSON *pRepsObj = NULL;             /* reps object */
+    cJSON *pPreInterval = NULL;         /* preInterval object */
+    cJSON *pPostInterval = NULL;        /* postInterval object */
+    cJSON *pPrePos = NULL;              /* preInterval pos */
+    cJSON *pPreMovetime = NULL;         /* preInterval movetime */
+    cJSON *pPreWaittime = NULL;         /* preInterval waittime */
+    cJSON *pPreBeep = NULL;             /* preInterval beep */
+    cJSON *pPostPos = NULL;             /* postInterval pos */
+    cJSON *pPostMovetime = NULL;        /* postInterval movetime */
+    cJSON *pPostWaittime = NULL;        /* postInterval waittime */
+    cJSON *pPostBeep = NULL;            /* postInterval beep */
+    cJSON *pActsArr = NULL;             /* act array */
+    cJSON *pAction = NULL;              /* action item */
+    cJSON *pAPos = NULL;                /* action pos */
+    cJSON *pAMovetime = NULL;           /* action movetime */
+    cJSON *pAWaittime = NULL;           /* action waittime */
+    cJSON *pABeep = NULL;               /* action beep */
+
+    /* shape */
+    cJSON *pShapeObj = NULL;            /* shape object */
+    TCHAR *pszShape = NULL;             /* shape string */
+
+    /* counters */
+    int nDataIdx = 0;                   /* data array index */
+    int nDataTotal = 0;                 /* total data count */
+    int nRepIdx = 0;                    /* rep loop variable */
+    int nActIdx = 0;                    /* action loop variable */
+    int nReps = 0;                      /* reps count */
+    int nActCount = 0;                  /* act count per motion */
+    int nBeepType = 0;                  /* parsed beep type */
+
+    /* customer/size info */
+    double dCustomerLevel = 0.0;        /* customer level */
+    int nCourse = 0;                    /* course count */
+
+    /* timing */
+    double dAccumulatedTime = 0.0;      /* accumulated sequence time */
+
+    /* sequence action pointer */
+    SequenceAct *pSeqAct = NULL;        /* sequence action pointer */
+
+    /* temporary action array for one motion level */
+    Action astTmpActs[ 50 ];            /* temp action array */
+    Action stTmpPre = { 0 };            /* temp pre interval */
+    Action stTmpPost = { 0 };           /* temp post interval */
+
+    memset( astTmpActs, 0, sizeof( astTmpActs ) );
+
+    /* ===== Load volume setting ===== */
+    pVolumeObj = cJSON_GetObjectItem( pJson, "volume" );
+    if( pVolumeObj )
+    {
+        nVolumeVal = ( int )pVolumeObj->valuedouble;
+        if( nVolumeVal < 0 )
+        {
+            nVolumeVal = 0;
+        }
+        if( nVolumeVal > 100 )
+        {
+            nVolumeVal = 100;
+        }
+        g_nBeepVolume = nVolumeVal;
+    }
+
+    /* ===== Load transparency setting ===== */
+    pTransObj = cJSON_GetObjectItem( pJson, "transparent" );
+    if( pTransObj )
+    {
+        nTransVal = ( int )pTransObj->valuedouble;
+        g_nTransparency = ( int )( ( 100.0 - nTransVal ) / 100.0 * 255.0 );
+        if( g_nTransparency < 0 )
+        {
+            g_nTransparency = 0;
+        }
+        if( g_nTransparency > 255 )
+        {
+            g_nTransparency = 255;
+        }
+        g_nTransparencyPct = nTransVal;
+    }
+
+    /* ===== Load horizontal position setting ===== */
+    pDickposObj = cJSON_GetObjectItem( pJson, "horizontal" );
+    if( pDickposObj && pDickposObj->valuestring )
+    {
+        pszConvertedStr = AllocTCHARFromUTF8( pDickposObj->valuestring );
+        if( pszConvertedStr )
+        {
+            _tcsncpy( g_szHorizontal, pszConvertedStr, 19 );
+            g_szHorizontal[ 19 ] = TEXT( '\0' );
+            free( pszConvertedStr );
+            pszConvertedStr = NULL;
+        }
+    }
+
+    /* ===== Load vertical position setting ===== */
+    pVerticalObj = cJSON_GetObjectItem( pJson, "vertical" );
+    if( pVerticalObj && pVerticalObj->valuestring )
+    {
+        pszConvertedStr = AllocTCHARFromUTF8( pVerticalObj->valuestring );
+        if( pszConvertedStr )
+        {
+            _tcsncpy( g_szVertical, pszConvertedStr, 19 );
+            g_szVertical[ 19 ] = TEXT( '\0' );
+            free( pszConvertedStr );
+            pszConvertedStr = NULL;
+        }
+    }
+
+    /* ===== Count total data entries ===== */
+    pDataArr = cJSON_GetObjectItem( pJson, "data" );
+    if( !pDataArr )
+    {
+        return 0;
+    }
+    cJSON_ArrayForEach( pDataItem, pDataArr )
+    {
+        nDataTotal++;
+    }
+
+    /* ===== Build sequence from data array ===== */
+    g_nActCount = 0;
+    nDataIdx = 0;
+    dAccumulatedTime = 0.0;
+
+    cJSON_ArrayForEach( pDataItem, pDataArr )
+    {
+        nDataIdx++;
+
+        /* Customer info */
+        pCustomerObj = cJSON_GetObjectItem( pDataItem, "customer" );
+        dCustomerLevel = 0.0;
+        nCourse = 0;
+        if( pCustomerObj )
+        {
+            cJSON *pLevelObj = cJSON_GetObjectItem( pCustomerObj, "level" );
+            cJSON *pCourseObj = cJSON_GetObjectItem( pCustomerObj, "course" );
+            if( pLevelObj )
+            {
+                dCustomerLevel = pLevelObj->valuedouble;
+            }
+            if( pCourseObj )
+            {
+                nCourse = pCourseObj->valueint;
+            }
+        }
+
+        /* Size info */
+        pszShape = NULL;
+        pSizeObj = cJSON_GetObjectItem( pDataItem, "size" );
+        if( pSizeObj )
+        {
+            pShapeObj = cJSON_GetObjectItem( pSizeObj, "shape" );
+            if( pShapeObj && pShapeObj->valuestring )
+            {
+                pszShape = AllocTCHARFromUTF8( pShapeObj->valuestring );
+            }
+        }
+        if( !pszShape )
+        {
+            pszShape = _tcsdup( TEXT( "" ) );
+        }
+
+        /* Motion array */
+        pMotionArr = cJSON_GetObjectItem( pDataItem, "motion" );
+        if( pMotionArr )
+        {
+            int nMotionIdx = 0;             /* motion index in this data item */
+            int nMotionTotal = 0;           /* total motions in this data item */
+
+            cJSON_ArrayForEach( pMotionItem, pMotionArr )
+            {
+                nMotionTotal++;
+            }
+
+            nMotionIdx = 0;
+            cJSON_ArrayForEach( pMotionItem, pMotionArr )
+            {
+                nMotionIdx++;
+
+                /* Motion name */
+                pMotionName = cJSON_GetObjectItem( pMotionItem, "name" );
+
+                /* Reps */
+                nReps = 1;
+                pRepsObj = cJSON_GetObjectItem( pMotionItem, "reps" );
+                if( pRepsObj )
+                {
+                    nReps = pRepsObj->valueint;
+                }
+
+                /* Pre-interval */
+                memset( &stTmpPre, 0, sizeof( stTmpPre ) );
+                pPreInterval = cJSON_GetObjectItem( pMotionItem, "preInterval" );
+                if( pPreInterval )
+                {
+                    pPrePos      = cJSON_GetObjectItem( pPreInterval, "pos" );
+                    pPreMovetime = cJSON_GetObjectItem( pPreInterval, "movetime" );
+                    pPreWaittime = cJSON_GetObjectItem( pPreInterval, "waittime" );
+                    pPreBeep     = cJSON_GetObjectItem( pPreInterval, "beep" );
+
+                    stTmpPre.nPos      = pPrePos      ? pPrePos->valueint          : 1;
+                    stTmpPre.dMovetime = pPreMovetime ? pPreMovetime->valuedouble   : 0.0;
+                    stTmpPre.dWaittime = pPreWaittime ? pPreWaittime->valuedouble   : 0.0;
+
+                    nBeepType = 0;
+                    if( pPreBeep && pPreBeep->valuestring )
+                    {
+                        if( !strcmp( pPreBeep->valuestring, "high" ) )      { nBeepType = 1; }
+                        else if( !strcmp( pPreBeep->valuestring, "low" ) )  { nBeepType = 2; }
+                        else if( !strcmp( pPreBeep->valuestring, "mid" ) )  { nBeepType = 3; }
+                    }
+                    stTmpPre.nBeepType = nBeepType;
+                }
+
+                /* Post-interval */
+                memset( &stTmpPost, 0, sizeof( stTmpPost ) );
+                pPostInterval = cJSON_GetObjectItem( pMotionItem, "postInterval" );
+                if( pPostInterval )
+                {
+                    pPostPos      = cJSON_GetObjectItem( pPostInterval, "pos" );
+                    pPostMovetime = cJSON_GetObjectItem( pPostInterval, "movetime" );
+                    pPostWaittime = cJSON_GetObjectItem( pPostInterval, "waittime" );
+                    pPostBeep     = cJSON_GetObjectItem( pPostInterval, "beep" );
+
+                    stTmpPost.nPos      = pPostPos      ? pPostPos->valueint          : 1;
+                    stTmpPost.dMovetime = pPostMovetime ? pPostMovetime->valuedouble   : 0.0;
+                    stTmpPost.dWaittime = pPostWaittime ? pPostWaittime->valuedouble   : 0.0;
+
+                    nBeepType = 0;
+                    if( pPostBeep && pPostBeep->valuestring )
+                    {
+                        if( !strcmp( pPostBeep->valuestring, "high" ) )      { nBeepType = 1; }
+                        else if( !strcmp( pPostBeep->valuestring, "low" ) )  { nBeepType = 2; }
+                        else if( !strcmp( pPostBeep->valuestring, "mid" ) )  { nBeepType = 3; }
+                    }
+                    stTmpPost.nBeepType = nBeepType;
+                }
+
+                /* Actions */
+                memset( astTmpActs, 0, sizeof( astTmpActs ) );
+                nActCount = 0;
+                pActsArr = cJSON_GetObjectItem( pMotionItem, "act" );
+                if( pActsArr )
+                {
+                    cJSON_ArrayForEach( pAction, pActsArr )
+                    {
+                        if( nActCount >= 50 )
+                        {
+                            break;
+                        }
+                        pAPos      = cJSON_GetObjectItem( pAction, "pos" );
+                        pAMovetime = cJSON_GetObjectItem( pAction, "movetime" );
+                        pAWaittime = cJSON_GetObjectItem( pAction, "waittime" );
+                        pABeep     = cJSON_GetObjectItem( pAction, "beep" );
+
+                        astTmpActs[ nActCount ].nPos      = pAPos      ? pAPos->valueint         : 1;
+                        astTmpActs[ nActCount ].dMovetime = pAMovetime ? pAMovetime->valuedouble  : 0.0;
+                        astTmpActs[ nActCount ].dWaittime = pAWaittime ? pAWaittime->valuedouble  : 0.0;
+
+                        nBeepType = 0;
+                        if( pABeep && pABeep->valuestring )
+                        {
+                            if( !strcmp( pABeep->valuestring, "high" ) )      { nBeepType = 1; }
+                            else if( !strcmp( pABeep->valuestring, "low" ) )  { nBeepType = 2; }
+                            else if( !strcmp( pABeep->valuestring, "mid" ) )  { nBeepType = 3; }
+                        }
+                        astTmpActs[ nActCount ].nBeepType = nBeepType;
+                        nActCount++;
+                    }
+                }
+
+                /* Emit pre-interval */
+                if( stTmpPre.dMovetime > 0 || stTmpPre.dWaittime > 0 )
+                {
+                    if( g_nActCount < 10000 )
+                    {
+                        pSeqAct = &g_pstSequence[ g_nActCount ];
+                        memset( pSeqAct, 0, sizeof( SequenceAct ) );
+                        g_nActCount++;
+
+                        pSeqAct->nPos           = stTmpPre.nPos;
+                        pSeqAct->dMovetime      = stTmpPre.dMovetime;
+                        pSeqAct->dWaittime      = stTmpPre.dWaittime;
+                        pSeqAct->dStartTime     = dAccumulatedTime;
+                        pSeqAct->nBeepType      = stTmpPre.nBeepType;
+                        pSeqAct->dCustomerLevel = dCustomerLevel;
+                        pSeqAct->nCustomerIdx   = nDataIdx;
+                        pSeqAct->nTotalCustomers = nDataTotal;
+                        pSeqAct->nCourseIdx     = nMotionIdx;
+                        pSeqAct->nTotalCourses  = nMotionTotal;
+                        pSeqAct->nCurrentRep    = 1;
+                        pSeqAct->nTotalReps     = 1;
+                        pSeqAct->szMotionName   = _tcsdup( TEXT( "ready" ) );
+                        pSeqAct->szShape        = _tcsdup( pszShape );
+
+                        dAccumulatedTime += ( stTmpPre.dMovetime + stTmpPre.dWaittime );
+                    }
+                }
+
+                /* Emit reps */
+                for( nRepIdx = 0; nRepIdx < nReps; nRepIdx++ )
+                {
+                    for( nActIdx = 0; nActIdx < nActCount; nActIdx++ )
+                    {
+                        if( g_nActCount >= 10000 )
+                        {
+                            break;
+                        }
+                        pSeqAct = &g_pstSequence[ g_nActCount ];
+                        memset( pSeqAct, 0, sizeof( SequenceAct ) );
+                        g_nActCount++;
+
+                        pSeqAct->nPos           = astTmpActs[ nActIdx ].nPos;
+                        pSeqAct->dMovetime      = astTmpActs[ nActIdx ].dMovetime;
+                        pSeqAct->dWaittime      = astTmpActs[ nActIdx ].dWaittime;
+                        pSeqAct->dStartTime     = dAccumulatedTime;
+                        pSeqAct->nBeepType      = astTmpActs[ nActIdx ].nBeepType;
+                        pSeqAct->dCustomerLevel = dCustomerLevel;
+                        pSeqAct->nCustomerIdx   = nDataIdx;
+                        pSeqAct->nTotalCustomers = nDataTotal;
+                        pSeqAct->nCourseIdx     = nMotionIdx;
+                        pSeqAct->nTotalCourses  = nMotionTotal;
+                        pSeqAct->nCurrentRep    = nRepIdx + 1;
+                        pSeqAct->nTotalReps     = nReps;
+
+                        if( pMotionName && pMotionName->valuestring )
+                        {
+                            pszConvertedStr = AllocTCHARFromUTF8( pMotionName->valuestring );
+                            pSeqAct->szMotionName = pszConvertedStr ? pszConvertedStr : _tcsdup( TEXT( "" ) );
+                        }
+                        else
+                        {
+                            pSeqAct->szMotionName = _tcsdup( TEXT( "" ) );
+                        }
+                        pSeqAct->szShape = _tcsdup( pszShape );
+
+                        dAccumulatedTime += ( pSeqAct->dMovetime + pSeqAct->dWaittime );
+                    }
+                }
+
+                /* Emit post-interval */
+                if( stTmpPost.dMovetime > 0 || stTmpPost.dWaittime > 0 )
+                {
+                    if( g_nActCount < 10000 )
+                    {
+                        pSeqAct = &g_pstSequence[ g_nActCount ];
+                        memset( pSeqAct, 0, sizeof( SequenceAct ) );
+                        g_nActCount++;
+
+                        pSeqAct->nPos           = stTmpPost.nPos;
+                        pSeqAct->dMovetime      = stTmpPost.dMovetime;
+                        pSeqAct->dWaittime      = stTmpPost.dWaittime;
+                        pSeqAct->dStartTime     = dAccumulatedTime;
+                        pSeqAct->nBeepType      = stTmpPost.nBeepType;
+                        pSeqAct->dCustomerLevel = dCustomerLevel;
+                        pSeqAct->nCustomerIdx   = nDataIdx;
+                        pSeqAct->nTotalCustomers = nDataTotal;
+                        pSeqAct->nCourseIdx     = nMotionIdx;
+                        pSeqAct->nTotalCourses  = nMotionTotal;
+                        pSeqAct->nCurrentRep    = nReps;
+                        pSeqAct->nTotalReps     = nReps;
+                        pSeqAct->szMotionName   = _tcsdup( TEXT( "rest" ) );
+                        pSeqAct->szShape        = _tcsdup( pszShape );
+
+                        dAccumulatedTime += ( stTmpPost.dMovetime + stTmpPost.dWaittime );
+                    }
+                }
+            }
+        }
+
+        free( pszShape );
+        pszShape = NULL;
+    }
+
+    /* Set customer range for first data entry */
+    g_nCurrentCustomerIdx = 0;
+    g_nCurrentCustomerStartAct = 0;
+    g_nCurrentAct = 0;
+    g_nCurrentCustomerEndAct = g_nActCount;
+
+    {
+        int nLoopIdx = 0;               /* loop variable */
+        for( nLoopIdx = 1; nLoopIdx < g_nActCount; nLoopIdx++ )
+        {
+            if( g_pstSequence[ nLoopIdx ].nCustomerIdx != g_pstSequence[ 0 ].nCustomerIdx )
+            {
+                g_nCurrentCustomerEndAct = nLoopIdx;
+                break;
+            }
+        }
+    }
+
     return 1;
 }
 

@@ -1,6 +1,7 @@
 ﻿{
-  "volume"      :100,
-  "transparent" : 20,
+  "mode"        : "random",
+  "volume"      : 100,
+  "transparent" :  20,
   "horizontal"  : "left",
   "vertical"    : "bottom",
   "customer" :
@@ -140,7 +141,7 @@
           "act"          :
           [
             { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
-            { "pos" : 5, "movetime" :  2   , "waittime" :  1   , "beep" : "high" }
+            { "pos" : 5, "movetime" :  1   , "waittime" :  1   , "beep" : "high" }
           ],
           "postInterval" :
           {   "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  }
@@ -153,7 +154,7 @@
           "act"          :
           [
             { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
-            { "pos" : 5, "movetime" :  2   , "waittime" :  1   , "beep" : "high" }
+            { "pos" : 5, "movetime" :  1   , "waittime" :  1   , "beep" : "high" }
           ],
           "postInterval" :
           {   "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  }
@@ -162,11 +163,11 @@
           "level"        :  3,
           "reps"         : 80,
           "preInterval"  :
-          {   "pos" : 2, "movetime" :  1   , "waittime" :  1   , "beep" : "high"},
+          {   "pos" : 2, "movetime" :  1   , "waittime" :  1   , "beep" : "high" },
           "act"          :
           [
             { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
-            { "pos" : 5, "movetime" :  2   , "waittime" :  1   , "beep" : "high" }
+            { "pos" : 5, "movetime" :  1   , "waittime" :  1   , "beep" : "high" }
           ],
           "postInterval" :
           {   "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  }
@@ -175,14 +176,14 @@
           "level"        :  4,
           "reps"         : 20,
           "preInterval"  :
-          {   "pos" : 2, "movetime" :  1   , "waittime" :  1   , "beep" : "high"},
+          {   "pos" : 2, "movetime" :  1   , "waittime" :  1   , "beep" : "high" },
           "act"          :
           [
             { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
             { "pos" : 5, "movetime" :  1   , "waittime" :  2   , "beep" : "high" }
           ],
           "postInterval" :
-          {   "pos" : 1, "movetime" :  1   , "waittime" :  1.5  , "beep" : "low"  }
+          {   "pos" : 1, "movetime" :  1   , "waittime" :  1.5  , "beep" : "low" }
         },
         {
           "level"        :  5,
@@ -217,7 +218,7 @@
           {   "pos" : 2, "movetime" :  1   , "waittime" :  1   , "beep" : "high" },
           "act"          :
           [
-            { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
+            { "pos" : 1, "movetime" :  0.5 , "waittime" :  1   , "beep" : "low"  },
             { "pos" : 5, "movetime" :  0.5 , "waittime" :  3   , "beep" : "high" }
           ],
           "postInterval" :
@@ -230,7 +231,7 @@
           {   "pos" : 2, "movetime" :  1   , "waittime" :  1   , "beep" : "high" },
           "act"          :
           [
-            { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
+            { "pos" : 1, "movetime" :  0.5 , "waittime" :  1   , "beep" : "low"  },
             { "pos" : 5, "movetime" :  0.5 , "waittime" :  3   , "beep" : "high" }
           ],
           "postInterval" :
@@ -243,7 +244,7 @@
           {   "pos" : 2, "movetime" :  1   , "waittime" :  1   , "beep" : "high" },
           "act"          :
           [
-            { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
+            { "pos" : 1, "movetime" :  0.5 , "waittime" :  1   , "beep" : "low"  },
             { "pos" : 5, "movetime" :  0.5 , "waittime" :  3   , "beep" : "high" }
           ],
           "postInterval" :

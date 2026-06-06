@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <windows.h>
 
@@ -8,7 +8,7 @@ typedef struct
     int nPos;                       /* position */
     double dMovetime;               /* move time */
     double dWaittime;               /* wait time */
-    int nBeepType;                  /* beep type (0=none, 1=high(1200Hz), 2=low(400Hz), 3=mid(800Hz)) */
+    int nBeepType;                  /* beep type (0=none, 1=low(400Hz), 2=mid(800Hz), 3=high(1200Hz)) */
 } Action;
 
 typedef struct
@@ -31,7 +31,7 @@ typedef struct
     int nTotalReps;                 /* total reps */
     TCHAR *szShape;                 /* size shape */
 
-    int nBeepType;                  /* beep type (0=none, 1=high(1200Hz), 2=low(400Hz), 3=mid(800Hz)) */
+    int nBeepType;                  /* beep type (0=none, 1=low(400Hz), 2=mid(800Hz), 3=high(1200Hz)) */
 } SequenceAct;
 
 typedef struct
@@ -134,6 +134,9 @@ extern int g_nTransparency;
 /* Dick position */
 extern TCHAR g_szHorizontal[ 20 ];
 extern TCHAR g_szVertical[ 20 ];
+
+/* Mode */
+extern TCHAR g_szMode[ 20 ];        /* "random" or "sequence" */
 
 /* Performance timing */
 extern LARGE_INTEGER g_liFrequency;

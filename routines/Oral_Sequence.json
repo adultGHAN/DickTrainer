@@ -1,0 +1,96 @@
+{
+  "mode"        : "sequence",
+  "volume"      : 100,
+  "transparent" :  20,
+  "horizontal"  : "left",
+  "vertical"    : "bottom",
+  "data" :
+  [
+    {
+      "customer" : { "level" :  1, "course" :  3, "size_admend" : -1, "motion_admend" : -1 },
+      "size"     : { "level" :  1, "shape" : "mid length, mid width" },
+      "motion"   :
+      [
+        {
+          "name"         : "warmup",
+          "level"        :  1,
+          "reps"         :  5,
+          "preInterval"  :
+          {   "pos" : 0, "movetime" :  0   , "waittime" :  0   , "beep" : "none" },
+          "act"          :
+          [
+            { "pos" : 1, "movetime" :  5   , "waittime" :  1   , "beep" : "low"  },
+            { "pos" : 5, "movetime" :  5   , "waittime" :  1   , "beep" : "high" }
+          ],
+          "postInterval" :
+          {   "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  }
+        },
+        {
+          "name"         : "deepthroat",
+          "level"        :  1,
+          "reps"         : 20,
+          "preInterval"  :
+          {   "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "high" },
+          "act"          :
+          [
+            { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
+            { "pos" : 5, "movetime" :  1   , "waittime" :  1   , "beep" : "high" }
+          ],
+          "postInterval" :
+          {   "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  }
+        },
+        {
+          "name"         : "hold",
+          "level"        :  1,
+          "reps"         :  3,
+          "preInterval"  :
+          {   "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "high" },
+          "act"          :
+          [
+            { "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  },
+            { "pos" : 5, "movetime" :  1   , "waittime" :  20  , "beep" : "high" }
+          ],
+          "postInterval" :
+          {   "pos" : 1, "movetime" :  1   , "waittime" :  1   , "beep" : "low"  }
+        },
+        {
+          "name"         : "facefuck",
+          "level"        :  1,
+          "reps"         : 10,
+          "preInterval"  :
+          {   "pos" : 2, "movetime" :  1   , "waittime" :  1   , "beep" : "high" },
+          "act"          :
+          [
+            { "pos" : 2, "movetime" :  0.25, "waittime" :  1.5 , "beep" : "low"  },
+            { "pos" : 5, "movetime" :  0.25, "waittime" :  0.25, "beep" : "high" },
+            { "pos" : 4, "movetime" :  0.25, "waittime" :  0.25, "beep" : "mid"  },
+            { "pos" : 5, "movetime" :  0.25, "waittime" :  0.25, "beep" : "high" },
+            { "pos" : 4, "movetime" :  0.25, "waittime" :  0.25, "beep" : "mid"  },
+            { "pos" : 5, "movetime" :  0.25, "waittime" :  0.25, "beep" : "high" },
+            { "pos" : 4, "movetime" :  0.25, "waittime" :  0.25, "beep" : "mid"  },
+            { "pos" : 5, "movetime" :  0.25, "waittime" :  0.25, "beep" : "high" }
+          ],
+          "postInterval" :
+          {   "pos" : 1, "movetime" :  1   , "waittime" :  2   , "beep" : "low"  }
+        },
+        {
+          "name" : "cum",
+          "dist" : "normal",
+          "level"        :  1,
+          "reps"         :  1,
+          "preInterval"  :
+          {   "pos" : 0, "movetime" :  0   , "waittime" :  0   , "beep" : "high" },
+          "act"          :
+          [
+            { "pos" : 2, "movetime" :  0.25, "waittime" :  1   , "beep" : "low"  },
+            { "pos" : 5, "movetime" :  0.25, "waittime" :  5   , "beep" : "high" },
+            { "pos" : 3, "movetime" :  0.25, "waittime" :  1   , "beep" : "mid"  },
+            { "pos" : 5, "movetime" :  0.25, "waittime" :  5   , "beep" : "high" }
+          ],
+          "postInterval" :
+          {   "pos" : 1, "movetime" :  1   , "waittime" : 10   , "beep" : "low"  }
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-﻿#include <windows.h>
+#include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +48,7 @@ int g_bGraphStarted = 0;
 
 /* GUI state */
 int g_nGUIState = 0;
-TCHAR g_szInputBuf[ 16 ] = TEXT( "" );
+TCHAR g_szInputBuf[ 16 ] = { 0 };
 int g_bWaitingForEnter = 0;
 int g_bPaused = 0;
 int g_bCompleted = 0;
@@ -70,13 +70,16 @@ int g_nTransparencyPct = 0;
 LARGE_INTEGER g_liLastInputTime = { 0 };
 
 /* Dick position */
-TCHAR g_szHorizontal[ 20 ] = TEXT( "" );
+TCHAR g_szHorizontal[ 20 ] = { 0 };
 
 /* JSON file path */
-TCHAR g_szJsonFilePath[ MAX_PATH ] = TEXT( "" );
+TCHAR g_szJsonFilePath[ MAX_PATH ] = { 0 };
 
 /* Vertical */
-TCHAR g_szVertical[ 20 ] = TEXT( "" );
+TCHAR g_szVertical[ 20 ] = { 0 };
+
+/* Mode */
+TCHAR g_szMode[ 20 ] = { 0 };
 
 /* Log flag */
 int g_bLog = 0;
@@ -96,7 +99,7 @@ LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM );
 int ResetAllState( void )
 {
     OPENFILENAME stOfn = { 0 };      /* open file dialog struct */
-    TCHAR szFilePath[ MAX_PATH ] = TEXT( "" ); /* selected file path */
+    TCHAR szFilePath[ MAX_PATH ] = { 0 }; /* selected file path */
     DataSizes stDataSizes = { 0 };  /* json data sizes */
 
     /* Open file dialog */
@@ -117,15 +120,15 @@ int ResetAllState( void )
     FreeAllData();
 
     stDataSizes = CalculateDataSizes( g_szJsonFilePath );
-    if( stDataSizes.nCustomerCount == 0 || stDataSizes.nMotionCount == 0 || stDataSizes.nSizeCount == 0 )
+    if( stDataSizes.nCustomerCount == 0 || stDataSizes.nMaxSequenceCount == 0 )
     {
         _tprintf( TEXT( "JSON Calculation Failed!\n" ) );
         return 0;
     }
 
     g_pstCustomers = ( CustomerInfo * )malloc( stDataSizes.nCustomerCount * sizeof( CustomerInfo ) );
-    g_pstMotions   = ( Motion * )malloc( stDataSizes.nMotionCount * sizeof( Motion ) );
-    g_pstSizes     = ( SizeInfo * )malloc( stDataSizes.nSizeCount * sizeof( SizeInfo ) );
+    g_pstMotions   = stDataSizes.nMotionCount > 0 ? ( Motion * )malloc( stDataSizes.nMotionCount * sizeof( Motion ) ) : NULL;
+    g_pstSizes     = stDataSizes.nSizeCount > 0 ? ( SizeInfo * )malloc( stDataSizes.nSizeCount * sizeof( SizeInfo ) ) : NULL;
     g_pstSequence  = ( SequenceAct * )malloc( stDataSizes.nMaxSequenceCount * sizeof( SequenceAct ) );
 
     g_nCustomerCapacity = stDataSizes.nCustomerCount;
@@ -140,14 +143,19 @@ int ResetAllState( void )
         return 0;
     }
 
-    g_nCurrentAct       = 0;
     g_dCurrentTimeInAct = 0.0;
     g_bFirstBeepPlayed  = 0;
+    g_bGraphStarted     = 0;
 
-    g_nCurrentCustomerStartAct = 0;
-    g_nCurrentCustomerEndAct   = 0;
-    g_nCurrentCustomerIdx      = 0;
-    g_bGraphStarted            = 0;
+    /* For random mode, reset customer range here.
+       For sequence mode, LoadAllDataFromJson already set the correct range. */
+    if( _tcscmp( g_szMode, TEXT( "sequence" ) ) != 0 )
+    {
+        g_nCurrentAct              = 0;
+        g_nCurrentCustomerStartAct = 0;
+        g_nCurrentCustomerEndAct   = 0;
+        g_nCurrentCustomerIdx      = 0;
+    }
 
     g_nGUIState = 0;
     memset( g_szInputBuf, 0, sizeof( TCHAR ) * 16 );
@@ -289,7 +297,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
     LARGE_INTEGER liNow = { 0 };    /* current time */
     double dElapsed = 0.0;          /* elapsed time */
     TCHAR szTransparencyLabel[ 16 ] = { 0 }; /* transparency label */
-    TCHAR szTransparencyValue[ 16 ] = TEXT( "" ); /* transparency value text */
+    TCHAR szTransparencyValue[ 16 ] = { 0 }; /* transparency value text */
     HFONT hFontLabel = NULL;        /* label font */
     HFONT hFontValue = NULL;        /* value font */
     SIZE szLabelExtent = { 0 };     /* label text extent */
@@ -297,7 +305,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
     int nCenterX = 0;               /* overlay center X */
     int nBaseY = 0;                 /* overlay base Y */
     TCHAR szVolumeLabel[ 16 ] = { 0 }; /* volume label */
-    TCHAR szVolumeValue[ 16 ] = TEXT( "" ); /* volume value text */
+    TCHAR szVolumeValue[ 16 ] = { 0 }; /* volume value text */
 
     _tcsncpy( szTransparencyLabel, TEXT( "TRANSPARENT" ), 15 );
     szTransparencyLabel[ 15 ] = TEXT( '\0' );
@@ -323,7 +331,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
 
             if( g_nGUIState == 0 )
             {
-                if( wp >= '0' && wp <= '9' )
+                if( _tcscmp( g_szMode, TEXT( "sequence" ) ) != 0 && wp >= '0' && wp <= '9' )
                 {
                     nInputLen = ( int )_tcslen( g_szInputBuf );
                     if( nInputLen < 5 )
@@ -332,7 +340,7 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
                         g_szInputBuf[ nInputLen + 1 ] = TEXT( '\0' );
                     }
                 }
-                else if( wp >= VK_NUMPAD0 && wp <= VK_NUMPAD9 )
+                else if( _tcscmp( g_szMode, TEXT( "sequence" ) ) != 0 && wp >= VK_NUMPAD0 && wp <= VK_NUMPAD9 )
                 {
                     nInputLen = ( int )_tcslen( g_szInputBuf );
                     if( nInputLen < 5 )
@@ -351,15 +359,27 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wp, LPARAM lp )
                 }
                 else if( wp == VK_RETURN )
                 {
-                    nCustomerCount = _ttoi( g_szInputBuf );
-                    if( nCustomerCount > 0 )
+                    if( _tcscmp( g_szMode, TEXT( "sequence" ) ) == 0 )
                     {
-                        GenerateSequences( nCustomerCount );
+                        /* Sequence mode: sequences already built by LoadAllDataFromJson */
                         g_nGUIState        = 1;
                         g_bGraphStarted    = 0;
                         g_bWaitingForEnter = 1;
                         g_bFirstBeepPlayed = 0;
                         QueryPerformanceCounter( &g_liLastTime );
+                    }
+                    else
+                    {
+                        nCustomerCount = _ttoi( g_szInputBuf );
+                        if( nCustomerCount > 0 )
+                        {
+                            GenerateSequences( nCustomerCount );
+                            g_nGUIState        = 1;
+                            g_bGraphStarted    = 0;
+                            g_bWaitingForEnter = 1;
+                            g_bFirstBeepPlayed = 0;
+                            QueryPerformanceCounter( &g_liLastTime );
+                        }
                     }
                 }
             }
