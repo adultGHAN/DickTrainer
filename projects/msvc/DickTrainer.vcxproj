@@ -162,6 +162,9 @@
     <ClInclude Include="..\..\src\types.h" />
     <ClInclude Include="..\..\src\utils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitattributes" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

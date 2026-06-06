@@ -59,8 +59,8 @@
     <ClInclude Include="..\..\external\cjson\cJSON.h">
       <Filter>external\cJson</Filter>
     </ClInclude>
-    <ClInclude Include="src\types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitattributes" />
   </ItemGroup>
 </Project>
