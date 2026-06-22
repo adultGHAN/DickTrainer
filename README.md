@@ -1,5 +1,9 @@
 ﻿# DickTrainer
 
+## Documentation
+
+- [Configuration Reference](docs/configuration.md)
+
 ## Keyboard Controls
 
 ### Graph Screen
