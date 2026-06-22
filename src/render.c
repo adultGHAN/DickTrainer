@@ -313,6 +313,20 @@ void RenderGraph( HDC hdcMemory, int nWidth, int nHeight )
         g_nCurrentAct++;
         dActionDuration = g_pstSequence[ g_nCurrentAct ].dMovetime + g_pstSequence[ g_nCurrentAct ].dWaittime;
 
+        if( g_bLog )
+        {
+            printf( "[customer : %02d][course : %02d, %ls][rep : %03d / %03d][idx : %04d][pos : %04d][move : %06.2fs][wait : %06.2fs]\n",
+                g_pstSequence[ g_nCurrentAct ].nCustomerIdx,
+                g_pstSequence[ g_nCurrentAct ].nCourseIdx,
+                g_pstSequence[ g_nCurrentAct ].szMotionName,
+                g_pstSequence[ g_nCurrentAct ].nCurrentRep,
+                g_pstSequence[ g_nCurrentAct ].nTotalReps,
+                g_nCurrentAct,
+                g_pstSequence[ g_nCurrentAct ].nPos,
+                g_pstSequence[ g_nCurrentAct ].dMovetime,
+                g_pstSequence[ g_nCurrentAct ].dWaittime );
+        }
+
         nBeepType = g_pstSequence[ g_nCurrentAct ].nBeepType;
         if( nBeepType == 1 )
         {

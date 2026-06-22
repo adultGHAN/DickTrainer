@@ -1399,7 +1399,7 @@ void GenerateSequences( int nCount )
 
         if( g_bLog )
         {
-            _tprintf( TEXT( "[Customer %d] generated_level=%.4f  selected_customer_idx=%d  level=%.4f  course=%d\n" ),
+            _tprintf( TEXT( "[customer : %d][generated_level : %.4f][selected_customer_idx : %d][level : %.4f][course : %d]\n" ),
                 nCustomerIdx + 1,
                 dGeneratedCustomerLevel,
                 nSelectedCustomerIdx,
@@ -1441,7 +1441,7 @@ void GenerateSequences( int nCount )
 
         if( g_bLog )
         {
-            _tprintf( TEXT( "[Customer %d] generated_size_level=%.4f  selected_size=%s  level=%.4f\n" ),
+            _tprintf( TEXT( "[customer : %d][generated_size_level : %.4f][selected_size : %s][level : %.4f]\n" ),
                 nCustomerIdx + 1,
                 dGeneratedSizeLevel,
                 stSelectedSize.szShape,
@@ -1480,7 +1480,7 @@ void GenerateSequences( int nCount )
 
                 if( g_bLog )
                 {
-                    _tprintf( TEXT( "[Customer %d] [warmup] motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n" ),
+                    _tprintf( TEXT( "[customer : %d][type : warmup][motion_admend : %d][mean : %.4f][mean+admend : %.4f][generated : %.4f][selected_level : %.4f]\n" ),
                         nCustomerIdx + 1,
                         stSelectedCustomer.nMotionAdmend,
                         g_pstMotions[ nWarmupMotionIdx ].dMean,
@@ -1534,7 +1534,7 @@ void GenerateSequences( int nCount )
 
                 if( g_bLog )
                 {
-                    _tprintf( TEXT( "[Customer %d] [course %d] motion=%s  motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n" ),
+                    _tprintf( TEXT( "[customer : %d][course : %d][motion : %s][motion_admend : %d][mean : %.4f][mean+admend : %.4f][generated : %.4f][selected_level : %.4f]\n" ),
                         nCustomerIdx + 1,
                         nCourseIdx + 1,
                         g_pstMotions[ nSelectedMotionIdx ].szName,
@@ -1581,7 +1581,7 @@ void GenerateSequences( int nCount )
 
                 if( g_bLog )
                 {
-                    _tprintf( TEXT( "[Customer %d] [cum] motion_admend=%d  mean=%.4f  mean+admend=%.4f  generated=%.4f  selected_level=%.4f\n" ),
+                    _tprintf( TEXT( "[customer : %d][type : cum][motion_admend : %d][mean : %.4f][mean+admend : %.4f][generated : %.4f][selected_level : %.4f]\n" ),
                         nCustomerIdx + 1,
                         stSelectedCustomer.nMotionAdmend,
                         g_pstMotions[ nCumMotionIdx ].dMean,

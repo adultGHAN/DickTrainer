@@ -9,6 +9,7 @@
 #include "logic.h"
 #include "render.h"
 #include "audio.h"
+#include "version.h"
 
 /* --- Global Variable Definitions --- */
 /* Customer info */
@@ -192,10 +193,21 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLin
     _tcsncpy( g_szVertical, TEXT( "bottom" ), 19 );
     g_szVertical[ 19 ] = TEXT( '\0' );
 
+    if( strstr( szCmdLine, "-v" ) )
+    {
+        printf( "Dick Trainer v" VERSION_STRING "\n" );
+        return 0;
+    }
+
     if( strstr( szCmdLine, "-log" ) )
     {
         InitConsole();
+        printf( "Dick Trainer v" VERSION_STRING "\n" );
         g_bLog = 1;
+    }
+    else
+    {
+        ShowWindow( GetConsoleWindow(), SW_HIDE );
     }
 
     if( !ResetAllState( ) )

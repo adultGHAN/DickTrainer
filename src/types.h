@@ -121,6 +121,9 @@ extern int g_nCurrentCustomerEndAct;
 extern int g_nCurrentCustomerIdx;
 extern int g_bGraphStarted;
 
+/* Log flag */
+extern int g_bLog;
+
 /* GUI state */
 extern int g_nGUIState;
 extern TCHAR g_szInputBuf[ 16 ];

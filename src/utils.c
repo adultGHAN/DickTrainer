@@ -34,9 +34,6 @@ TCHAR *AllocTCHARFromUTF8( const char *pszSrc )
 
 void InitConsole( void )
 {
-    FILE *pFile = NULL;             /* file pointer for console output */
-    AllocConsole();
-    freopen( "CONOUT$", "w", stdout );
     setvbuf( stdout, NULL, _IONBF, 0 );
 }
 
