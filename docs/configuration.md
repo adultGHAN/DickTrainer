@@ -67,7 +67,7 @@ preInterval → act (× reps) → postInterval
 | `pos` | Target depth position. **1** = shallowest, **5** = deepest |
 | `move time` | Duration to move to the target `pos` |
 | `wait time` | Duration to hold at the target `pos` |
-| beep | A beep sound plays at the start of each action |
+| `beep` | A beep sound plays at the start of each act |
 
 ---
 
@@ -92,7 +92,7 @@ This section walks through a complete example of how Random Mode operates step b
 ![customer_count](img/customer_count.png)
 
 The program receives the number of customers from the user.
-The specified number of customers will be served in sequence.
+The specified number of customers will be served.
 
 ---
 
@@ -103,7 +103,7 @@ The specified number of customers will be served in sequence.
 The customer level is determined according to the configured random distribution.
 
 In this example, a normal distribution is used with a mean of **5** and a standard deviation of **2**.
-A value of **6.7** was sampled, and the customer at the closest level **7** was selected.
+A value of **6.7** was sampled, and the closest customer level **7** was selected.
 
 ---
 
@@ -114,7 +114,7 @@ A value of **6.7** was sampled, and the customer at the closest level **7** was 
 The size level is determined according to the configured random distribution.
 
 In this example, a normal distribution is used with a mean of **5** and a standard deviation of **2**.
-A value of **3.4** was sampled, closest to level **3**.
+A value of **3.4** was sampled, and the closest size level **3** was selected.
 However, since the selected customer (level 7) has a `size_admend` of **+1**,
 the final size level selected is **4**.
 
@@ -143,11 +143,12 @@ warmup → deepthroat → facefuck → deepthroat → cum
 
 ![warmup_select](img/warmup_select.png)
 
-The level of each motion is determined according to the random settings defined within that motion.
+The motion level is determined according to the configured random distribution.
 
 In this example, the random settings for `warmup` follow a normal distribution with a mean of **2** and a standard deviation of **0.75**.
-A value of **1.8** was sampled, closest to level **2**.
-Since the selected customer (level 7) has a `motion_admend` of **+1**, the final selected level is `warmup` level **3**.
+A value of **1.8** was sampled, and the closest `warmup` level **2** was selected.
+However, since the selected customer (level 7) has a `motion_admend` of **+1**,
+the final motion level selected is `warmup` level **3**.
 
 ---
 
