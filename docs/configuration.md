@@ -109,7 +109,7 @@ A value of **6.7** was sampled, and the customer at the closest level **7** was 
 
 ### Step 3 — Size Level Selection
 
-![size_select](img/size_slect.png)
+![size_select](img/size_select.png)
 
 The size level is determined according to the configured random distribution.
 
